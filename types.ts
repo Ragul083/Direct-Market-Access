@@ -1,3 +1,4 @@
+
 export enum UserRole {
   FARMER = 'FARMER',
   BUYER = 'BUYER',
@@ -22,7 +23,7 @@ export interface Crop {
   variety: string;
   quantity: number; // in kg
   expectedPrice: number; // per kg
-  imageUrl: string;
+  imageUrl?: string; // Optional
   location: string;
   uploadDate: string;
 }
@@ -38,6 +39,8 @@ export interface Message {
   senderId: string;
   text: string;
   timestamp: number; // Using unix timestamp for easy sorting
+  type: 'text' | 'audio';
+  audioUrl?: string;
 }
 
 export interface Conversation {

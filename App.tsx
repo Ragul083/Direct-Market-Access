@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, UserRole } from './types';
 import Login from './components/Login';
 import Signup from './components/Signup';
@@ -11,7 +11,7 @@ import ProfilePage from './components/ProfilePage';
 import NotificationsPage from './components/NotificationsPage';
 import { ChatProvider } from './contexts/ChatContext';
 import { LanguageProvider } from './contexts/LanguageContext';
-import { mockNotifications, updateUser as updateUserService } from './services/mockData';
+import { mockNotifications, updateUser as updateUserService, persistLoginSession, clearLoginSession, getPersistedSession } from './services/mockData';
 
 
 type Page = 'login' | 'signup';
@@ -19,7 +19,11 @@ type ActiveView = 'dashboard' | 'profile' | 'notifications';
 
 
 const App: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  // Initialize from session storage if available
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    return getPersistedSession();
+  });
+  
   const [currentPage, setCurrentPage] = useState<Page>('login');
   const [activeView, setActiveView] = useState<ActiveView>('dashboard');
   const [notificationUpdateTrigger, setNotificationUpdateTrigger] = useState(0); // Trigger re-render for notifications
@@ -27,10 +31,12 @@ const App: React.FC = () => {
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
+    persistLoginSession(user); // Save to local storage
     setActiveView('dashboard');
   };
 
   const handleLogout = () => {
+    clearLoginSession(); // Clear from local storage
     setCurrentUser(null);
     setCurrentPage('login');
   };

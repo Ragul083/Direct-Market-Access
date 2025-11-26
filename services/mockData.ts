@@ -1,9 +1,9 @@
-
 import { User, Crop, UserRole, ChartDataPoint, Conversation, Message, Notification } from '../types';
 
 const USER_STORAGE_KEY = 'agrilink_users';
 const NOTIF_STORAGE_KEY = 'agrilink_notifications';
 const CROP_STORAGE_KEY = 'agrilink_crops';
+const SESSION_STORAGE_KEY = 'agrilink_session'; // New key for active session
 
 const defaultUsers: User[] = [
   { id: 'user-1', name: 'Rajesh Kumar', email: 'rajesh.k@gmail.com', password: 'password123', role: UserRole.FARMER, location: 'Nashik, Maharashtra', verified: true },
@@ -19,13 +19,9 @@ const defaultNotifications: Notification[] = [
     { id: 'notif-4', userId: 'user-3', type: 'info', message: 'New farmer "Anjali Desai" requires verification.', timestamp: Date.now() - 1000 * 60 * 10, read: false },
 ];
 
-const defaultCrops: Crop[] = [
-  { id: 'crop-1', farmerId: 'user-1', farmerName: 'Rajesh Kumar', name: 'Onions', variety: 'Red', quantity: 500, expectedPrice: 25, imageUrl: 'https://picsum.photos/seed/onions/400/300', location: 'Nashik, Maharashtra', uploadDate: '2024-07-15' },
-  { id: 'crop-2', farmerId: 'user-1', farmerName: 'Rajesh Kumar', name: 'Grapes', variety: 'Thompson', quantity: 1000, expectedPrice: 60, imageUrl: 'https://picsum.photos/seed/grapes/400/300', location: 'Nashik, Maharashtra', uploadDate: '2024-07-12' },
-  { id: 'crop-3', farmerId: 'user-4', farmerName: 'Anjali Desai', name: 'Coffee', variety: 'Arabica', quantity: 300, expectedPrice: 250, imageUrl: 'https://picsum.photos/seed/coffee/400/300', location: 'Mysuru, Karnataka', uploadDate: '2024-07-20' },
-  { id: 'crop-4', farmerId: 'user-1', farmerName: 'Rajesh Kumar', name: 'Tomatoes', variety: 'Hybrid', quantity: 200, expectedPrice: 30, imageUrl: 'https://picsum.photos/seed/tomatoes/400/300', location: 'Nashik, Maharashtra', uploadDate: '2024-07-18' },
-  { id: 'crop-5', farmerId: 'user-4', farmerName: 'Anjali Desai', name: 'Ragi', variety: 'Local', quantity: 800, expectedPrice: 45, imageUrl: 'https://picsum.photos/seed/ragi/400/300', location: 'Mysuru, Karnataka', uploadDate: '2024-07-21' },
-];
+const defaultCrops: Crop[] = [];
+
+// --- DATABASE FUNCTIONS (Local Storage) ---
 
 // Load users from local storage or use defaults
 const loadUsers = (): User[] => {
@@ -90,7 +86,44 @@ const saveCrops = () => {
     }
 };
 
+// --- SESSION MANAGEMENT ---
+
+export const persistLoginSession = (user: User) => {
+    try {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user.id));
+    } catch (e) {
+        console.error("Failed to save session", e);
+    }
+};
+
+export const clearLoginSession = () => {
+    try {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+    } catch (e) {
+        console.error("Failed to clear session", e);
+    }
+};
+
+export const getPersistedSession = (): User | null => {
+    try {
+        const userId = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (userId) {
+            const parsedId = JSON.parse(userId);
+            return mockUsers.find(u => u.id === parsedId) || null;
+        }
+    } catch (e) {
+        console.error("Failed to restore session", e);
+    }
+    return null;
+};
+
+
+// --- API / HELPER FUNCTIONS ---
+
 export const registerUser = (userData: Omit<User, 'id' | 'verified'>): { success: boolean, message: string } => {
+  // Reload users to ensure we have latest data
+  mockUsers = loadUsers(); 
+  
   if (mockUsers.some(user => user.email === userData.email)) {
     return { success: false, message: 'An account with this email already exists.' };
   }
@@ -175,11 +208,25 @@ export const markAllNotificationsRead = (userId: string) => {
     saveNotifications();
 };
 
+export const notifyUserOfInterest = (targetUserId: string, buyerName: string, cropName: string) => {
+    const notification: Notification = {
+        id: `notif-interest-${Date.now()}`,
+        userId: targetUserId,
+        type: 'info',
+        message: `Buyer "${buyerName}" is interested in your crop "${cropName}". Check your messages!`,
+        timestamp: Date.now(),
+        read: false
+    };
+    mockNotifications.push(notification);
+    saveNotifications();
+};
+
 export const addCrop = (cropData: Omit<Crop, 'id' | 'uploadDate'>): Crop => {
     const newCrop: Crop = {
         ...cropData,
         id: `crop-${Date.now()}`,
-        uploadDate: new Date().toISOString().split('T')[0]
+        uploadDate: new Date().toISOString().split('T')[0],
+        imageUrl: cropData.imageUrl || undefined // Allow undefined/empty images
     };
     mockCrops.push(newCrop);
     saveCrops();
@@ -208,7 +255,7 @@ export let mockConversations: Conversation[] = [
 ];
 
 export let mockMessages: Message[] = [
-    { id: 'msg-1', conversationId: 'conv-1', senderId: 'user-2', text: 'Namaste Rajesh ji, are the onions ready for pickup?', timestamp: Date.now() - 1000 * 60 * 60 * 3 },
-    { id: 'msg-2', conversationId: 'conv-1', senderId: 'user-1', text: 'Namaste Priya ji! Almost, they are looking great.', timestamp: Date.now() - 1000 * 60 * 60 * 2.5 },
-    { id: 'msg-3', conversationId: 'conv-1', senderId: 'user-1', text: 'Sure, I can have them ready by Friday.', timestamp: Date.now() - 1000 * 60 * 60 * 2 },
+    { id: 'msg-1', conversationId: 'conv-1', senderId: 'user-2', text: 'Namaste Rajesh ji, are the onions ready for pickup?', timestamp: Date.now() - 1000 * 60 * 60 * 3, type: 'text' },
+    { id: 'msg-2', conversationId: 'conv-1', senderId: 'user-1', text: 'Namaste Priya ji! Almost, they are looking great.', timestamp: Date.now() - 1000 * 60 * 60 * 2.5, type: 'text' },
+    { id: 'msg-3', conversationId: 'conv-1', senderId: 'user-1', text: 'Sure, I can have them ready by Friday.', timestamp: Date.now() - 1000 * 60 * 60 * 2, type: 'text' },
 ];

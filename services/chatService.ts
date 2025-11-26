@@ -25,6 +25,7 @@ export const chatService = {
       senderId,
       text,
       timestamp: Date.now(),
+      type: 'text'
     };
     
     mockMessages.push(newMessage);
@@ -33,6 +34,33 @@ export const chatService = {
     conversation.lastMessage = text;
     conversation.lastMessageTimestamp = newMessage.timestamp;
 
+    return newMessage;
+  },
+
+  async sendAudioMessage(conversationId: string, senderId: string, audioBlob: Blob): Promise<Message> {
+    const conversation = mockConversations.find(c => c.id === conversationId);
+    if (!conversation) throw new Error('Conversation not found');
+
+    // Convert Blob to Base64 Data URL for local "storage" simulation
+    const reader = new FileReader();
+    const audioUrl = await new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(audioBlob);
+    });
+
+    const newMessage: Message = {
+      id: `msg-${Date.now()}`,
+      conversationId,
+      senderId,
+      text: 'Voice Message',
+      type: 'audio',
+      audioUrl: audioUrl,
+      timestamp: Date.now(),
+    };
+
+    mockMessages.push(newMessage);
+    conversation.lastMessage = '🎤 Voice Message';
+    conversation.lastMessageTimestamp = newMessage.timestamp;
     return newMessage;
   },
 
@@ -73,6 +101,7 @@ export const chatService = {
             senderId: targetUserId,
             text: `Hi there! Thanks for reaching out. How can I help you with my ${targetUser.role === UserRole.FARMER ? 'produce' : 'request'}?`,
             timestamp: Date.now() + 1000,
+            type: 'text'
         };
         mockMessages.push(welcomeMessage);
         newConversation.lastMessage = welcomeMessage.text;
