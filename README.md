@@ -1,78 +1,20 @@
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-# Direct Market Access (DMA) Platform
+# Run and deploy your AI Studio app
 
-## Overview
-The Direct Market Access (DMA) platform is a digital marketplace designed to connect farmers directly with buyers, eliminating intermediaries and ensuring fair pricing. The system provides real-time market information, AI-based price prediction, and secure transactions to improve transparency and efficiency in agricultural trading.
+This contains everything you need to run your app locally.
 
-The platform allows farmers to list their crops, buyers to view available products and place orders, and administrators to manage users and monitor transactions. By integrating modern technologies such as Artificial Intelligence, Machine Learning, and web-based interfaces, the system enhances agricultural market accessibility and decision-making.
+View your app in AI Studio: https://ai.studio/apps/49c1ae2d-f083-4c8e-8778-09584fe3fded
 
----
+## Run Locally
 
-## Objectives
-- Provide a direct connection between farmers and buyers.
-- Ensure fair crop pricing using AI-based price prediction.
-- Reduce dependency on middlemen in agricultural trade.
-- Provide real-time market information and demand analysis.
-- Enable secure digital transactions and order management.
+**Prerequisites:**  Node.js
 
----
 
-## Features
-- Farmer crop listing and management
-- Buyer product browsing and ordering
-- AI-based crop price prediction
-- Admin dashboard for system monitoring
-- Secure login and user authentication
-- Real-time notifications and alerts
-- Transaction and order tracking
-
----
-
-## Technology Stack
-
-### Frontend
-- HTML
-- CSS
-- JavaScript
-
-### Backend
-- Python (Flask / Django)
-
-### Database
-- MySQL / SQLite
-
-### Additional Technologies
-- Machine Learning (ARIMA / LSTM for price prediction)
-- REST APIs
-- JSON Data Handling
-
----
-
-## System Architecture
-
-1. **User Layer**
-   - Farmers
-   - Buyers
-   - Admin
-
-2. **Application Layer**
-   - Web Interface
-   - Authentication System
-   - Market Listing Module
-   - Order Processing Module
-
-3. **Intelligence Layer**
-   - AI/ML Price Prediction
-   - Demand-Supply Analysis
-
-4. **Data Layer**
-   - Database for users, crops, orders, and transactions
-
----
-
-## Installation
-
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/Ragul083/direct-market-access.git
-cd direct-market-access
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

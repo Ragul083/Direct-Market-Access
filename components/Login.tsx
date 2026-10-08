@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { mockUsers } from '../services/mockData';
+import { apiService } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface LoginProps {
@@ -13,13 +14,29 @@ const Login: React.FC<LoginProps> = ({ onLogin, showSignup }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { t, language, setLanguage } = useLanguage();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+
+    try {
+      // Authenticate against Python backend
+      const res = await apiService.login(email, password);
+      if (res.success && res.user) {
+        onLogin(res.user);
+        return;
+      }
+    } catch (err) {
+      console.warn('Python login attempt fallback:', err);
+    } finally {
+      setLoading(false);
+    }
+
+    // Local fallback
     const user = mockUsers.find(u => u.email === email);
-    
     if (user && user.password === password) {
       onLogin(user);
     } else {

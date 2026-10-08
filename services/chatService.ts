@@ -1,19 +1,51 @@
 import { Conversation, Message, User, UserRole } from '../types';
 import { mockConversations, mockMessages, mockUsers } from './mockData';
+import { apiService } from './apiService';
 
-// Simulate a database/API for chat
+// Chat service powered by Python backend with local fallback
 export const chatService = {
   async getConversationsForUser(userId: string): Promise<Conversation[]> {
+    try {
+      const serverConvs = await apiService.getConversations(userId);
+      if (serverConvs && serverConvs.length > 0) {
+        return serverConvs;
+      }
+    } catch (e) {
+      console.warn('Using local conversations fallback:', e);
+    }
     const userConversations = mockConversations.filter(c => c.participants[userId]);
     return userConversations.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
   },
 
   async getMessagesForConversation(conversationId: string): Promise<Message[]> {
+    try {
+      const serverMsgs = await apiService.getMessages(conversationId);
+      if (serverMsgs && serverMsgs.length > 0) {
+        return serverMsgs;
+      }
+    } catch (e) {
+      console.warn('Using local messages fallback:', e);
+    }
     const messages = mockMessages.filter(m => m.conversationId === conversationId);
     return messages.sort((a, b) => a.timestamp - b.timestamp);
   },
 
   async sendMessage(conversationId: string, senderId: string, text: string): Promise<Message> {
+    try {
+      const serverMsg = await apiService.sendMessage(conversationId, senderId, text, 'text');
+      if (serverMsg) {
+        mockMessages.push(serverMsg);
+        const conv = mockConversations.find(c => c.id === conversationId);
+        if (conv) {
+          conv.lastMessage = text;
+          conv.lastMessageTimestamp = serverMsg.timestamp;
+        }
+        return serverMsg;
+      }
+    } catch (e) {
+      console.warn('Using local send message fallback:', e);
+    }
+
     const conversation = mockConversations.find(c => c.id === conversationId);
     if (!conversation) {
       throw new Error('Conversation not found');
@@ -41,12 +73,24 @@ export const chatService = {
     const conversation = mockConversations.find(c => c.id === conversationId);
     if (!conversation) throw new Error('Conversation not found');
 
-    // Convert Blob to Base64 Data URL for local "storage" simulation
+    // Convert Blob to Base64 Data URL
     const reader = new FileReader();
     const audioUrl = await new Promise<string>((resolve) => {
         reader.onloadend = () => resolve(reader.result as string);
         reader.readAsDataURL(audioBlob);
     });
+
+    try {
+      const serverMsg = await apiService.sendMessage(conversationId, senderId, 'Voice Message', 'audio', audioUrl);
+      if (serverMsg) {
+        mockMessages.push(serverMsg);
+        conversation.lastMessage = 'Voice Message';
+        conversation.lastMessageTimestamp = serverMsg.timestamp;
+        return serverMsg;
+      }
+    } catch (e) {
+      console.warn('Using local send audio fallback:', e);
+    }
 
     const newMessage: Message = {
       id: `msg-${Date.now()}`,
@@ -59,8 +103,9 @@ export const chatService = {
     };
 
     mockMessages.push(newMessage);
-    conversation.lastMessage = '🎤 Voice Message';
+    conversation.lastMessage = 'Voice Message';
     conversation.lastMessageTimestamp = newMessage.timestamp;
+
     return newMessage;
   },
 

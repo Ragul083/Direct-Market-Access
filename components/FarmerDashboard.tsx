@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { User, ChartDataPoint, Crop } from '../types';
 import { getHistoricalPriceData, addCrop, mockCrops } from '../services/mockData';
 import { getAIPricePrediction, PricePrediction } from '../services/geminiService';
+import { apiService } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface FarmerDashboardProps {
@@ -65,10 +66,23 @@ const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ user }) => {
     e.preventDefault();
     setIsLoading(true);
     setPrediction(null);
-    const result = await getAIPricePrediction(cropName, variety, quantity, predictionState, language);
-    setPrediction(result);
-    setChartData(getHistoricalPriceData(cropName));
-    setIsLoading(false);
+    try {
+      const [result, history] = await Promise.all([
+        getAIPricePrediction(cropName, variety, quantity, predictionState, language),
+        apiService.getCropHistory(cropName),
+      ]);
+      setPrediction(result);
+      if (history && history.length > 0) {
+        setChartData(history);
+      } else {
+        setChartData(getHistoricalPriceData(cropName));
+      }
+    } catch (err) {
+      console.warn("Prediction error:", err);
+      setChartData(getHistoricalPriceData(cropName));
+    } finally {
+      setIsLoading(false);
+    }
   }, [cropName, variety, quantity, predictionState, language]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -11,7 +11,7 @@ import ProfilePage from './components/ProfilePage';
 import NotificationsPage from './components/NotificationsPage';
 import { ChatProvider } from './contexts/ChatContext';
 import { LanguageProvider } from './contexts/LanguageContext';
-import { mockNotifications, updateUser as updateUserService, persistLoginSession, clearLoginSession, getPersistedSession } from './services/mockData';
+import { mockNotifications, updateUser as updateUserService, persistLoginSession, clearLoginSession, getPersistedSession, syncWithPythonBackend } from './services/mockData';
 
 
 type Page = 'login' | 'signup';
@@ -27,6 +27,13 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('login');
   const [activeView, setActiveView] = useState<ActiveView>('dashboard');
   const [notificationUpdateTrigger, setNotificationUpdateTrigger] = useState(0); // Trigger re-render for notifications
+
+  useEffect(() => {
+    // Initial sync with Python Backend
+    syncWithPythonBackend().then(() => {
+      setNotificationUpdateTrigger(prev => prev + 1);
+    });
+  }, []);
 
 
   const handleLogin = (user: User) => {

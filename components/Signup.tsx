@@ -15,6 +15,7 @@ const Signup: React.FC<SignupProps> = ({ showLogin }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<UserRole>(UserRole.FARMER);
   const [location, setLocation] = useState('');
+  const [aadhar, setAadhar] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const { t, language, setLanguage } = useLanguage();
@@ -34,7 +35,14 @@ const Signup: React.FC<SignupProps> = ({ showLogin }) => {
         return;
     }
 
-    const result = registerUser({ name, email, password, role, location });
+    // Aadhar validation: 12 digits, numeric only
+    const aadharRegex = /^\d{12}$/;
+    if (!aadharRegex.test(aadhar)) {
+        setError(t('signup.aadhar_error'));
+        return;
+    }
+
+    const result = registerUser({ name, email, password, role, location, aadharNumber: aadhar });
 
     if (result.success) {
       setSuccess(result.message);
@@ -76,6 +84,19 @@ const Signup: React.FC<SignupProps> = ({ showLogin }) => {
               placeholder={t('signup.name')}
               value={name}
               onChange={e => setName(e.target.value)}
+            />
+             <input
+              type="text"
+              required
+              className="w-full px-4 py-3 text-gray-700 bg-gray-100 border border-gray-200 rounded-lg focus:ring-green-500 focus:border-green-500"
+              placeholder={t('signup.aadhar')}
+              value={aadhar}
+              maxLength={12}
+              onChange={e => {
+                  // Only allow numbers
+                  const val = e.target.value.replace(/\D/g, '');
+                  setAadhar(val);
+              }}
             />
             <input
               type="email"

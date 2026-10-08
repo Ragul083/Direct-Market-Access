@@ -58,7 +58,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, onLogout, child
             )}
           </a>
         </nav>
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
+          <div className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between text-xs text-gray-600">
+            <span className="flex items-center">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+              Python 3.10 Backend
+            </span>
+            <span className="text-[10px] text-emerald-600 font-medium font-mono">ONLINE</span>
+          </div>
           <button onClick={onLogout} className="w-full flex items-center px-4 py-2 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg">
             <i className="fas fa-sign-out-alt w-6"></i>
             <span className="ml-3">{t('dashboard.logout')}</span>

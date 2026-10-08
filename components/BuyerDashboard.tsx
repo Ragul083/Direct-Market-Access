@@ -17,9 +17,10 @@ interface CropCardProps {
     onAnalyze: (crop: Crop) => void;
     contactText: string;
     analyzeText: string;
+    isVerified: boolean;
 }
 
-const CropCard: React.FC<CropCardProps> = ({ crop, onContact, onAnalyze, contactText, analyzeText }) => (
+const CropCard: React.FC<CropCardProps> = ({ crop, onContact, onAnalyze, contactText, analyzeText, isVerified }) => (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 border border-gray-100">
         <div className="p-6">
             <div className="flex justify-between items-start mb-2">
@@ -48,7 +49,9 @@ const CropCard: React.FC<CropCardProps> = ({ crop, onContact, onAnalyze, contact
                 </button>
                 <button 
                     onClick={() => onContact(crop.farmerId, crop.name)}
-                    className="flex-1 bg-orange-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors shadow-sm"
+                    disabled={!isVerified}
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${isVerified ? 'bg-orange-500 text-white hover:bg-orange-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                    title={!isVerified ? "Verification required" : ""}
                 >
                     <i className="fas fa-envelope mr-1"></i> {contactText}
                 </button>
@@ -80,6 +83,8 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ user }) => {
   }, [searchTerm, locationFilter]);
   
   const handleContactFarmer = async (farmerId: string, cropName: string) => {
+    if (!user.verified) return; // double check
+
     openChatWith(farmerId);
     notifyUserOfInterest(farmerId, user.name, cropName);
     const conversation = await chatService.startOrGetConversation(user.id, farmerId);
@@ -104,6 +109,19 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ user }) => {
 
   return (
     <div className="space-y-6 relative">
+      
+      {!user.verified && (
+         <div className="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-md shadow-sm" role="alert">
+            <div className="flex items-center">
+                <i className="fas fa-exclamation-triangle text-xl mr-3"></i>
+                <div>
+                    <p className="font-bold">{t('admin.table.status')}: Pending</p>
+                    <p>{t('buyer.verification_pending')}</p>
+                </div>
+            </div>
+         </div>
+      )}
+
       <div className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row gap-4 items-center">
         <div className="relative flex-grow w-full md:w-auto">
           <input 
@@ -138,6 +156,7 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ user }) => {
                     onAnalyze={handleAnalyzeCrop}
                     contactText={t('buyer.contact_farmer')} 
                     analyzeText={t('buyer.get_insight')}
+                    isVerified={!!user.verified}
                 />
             ))
         ) : (
@@ -167,7 +186,7 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ user }) => {
                           </div>
                       ) : prediction ? (
                           <div className="space-y-6">
-                              {/* Price Comparison - Removed AI Price */}
+                              {/* Price Comparison */}
                               <div className="flex justify-center mb-4">
                                   <div className="bg-gray-50 p-4 rounded-lg border text-center w-full max-w-xs">
                                       <p className="text-xs text-gray-500 mb-1">{t('buyer.asking_price')}</p>
@@ -212,26 +231,26 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ user }) => {
                                   </ul>
                               </div>
                               
-                              <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg text-sm">
-                                  <span className="text-gray-600 font-medium">{t('farmer.stats.demand_trend')}:</span>
-                                  <span className={`font-bold px-3 py-1 rounded-full ${prediction.demandTrend === 'High' ? 'bg-green-100 text-green-800' : prediction.demandTrend === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                                      {prediction.demandTrend}
-                                  </span>
+                              <div className="flex gap-4">
+                                  <div className="flex-1 bg-gray-50 p-3 rounded-lg text-center">
+                                       <span className="text-xs text-gray-500 block">{t('farmer.stats.demand_trend')}</span>
+                                       <span className="font-bold text-gray-800">{prediction.demandTrend}</span>
+                                  </div>
+                                  <div className="flex-1 bg-gray-50 p-3 rounded-lg text-center">
+                                       <span className="text-xs text-gray-500 block">{t('farmer.stats.best_time')}</span>
+                                       <span className="font-bold text-gray-800">{prediction.bestSellingTime}</span>
+                                  </div>
                               </div>
                           </div>
                       ) : (
-                          <div className="text-center text-red-500">
-                              <p>Failed to load insights. Please try again.</p>
-                          </div>
+                          <div className="text-center text-red-500">Failed to load insights.</div>
                       )}
-                  </div>
-                  
-                  <div className="p-4 border-t bg-gray-50 flex justify-end rounded-b-xl">
+                      
                       <button 
-                          onClick={closeAnalysisModal}
-                          className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
+                        onClick={closeAnalysisModal}
+                        className="w-full mt-6 bg-gray-200 text-gray-800 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                       >
-                          {t('buyer.close')}
+                        {t('buyer.close')}
                       </button>
                   </div>
               </div>

@@ -1,5 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
+import { apiService } from "./apiService";
 
 export interface PredictionFactors {
   weather: string;
@@ -22,10 +23,18 @@ export async function getAIPricePrediction(
   location: string,
   language: string = 'en'
 ): Promise<PricePrediction> {
+    // First, call the Python backend market intelligence service
+    try {
+      const pythonPrediction = await apiService.getPrediction(cropName, variety, quantity, location, language);
+      if (pythonPrediction && pythonPrediction.predictedPrice) {
+        return pythonPrediction;
+      }
+    } catch (e) {
+      console.warn("Python prediction service call failed, attempting local fallback:", e);
+    }
     
-    // This is a placeholder for a real API key.
-    // In a real application, this should be handled securely.
-    const apiKey = process.env.API_KEY;
+    // Fallback: Check client-side Gemini API or simulated models
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       console.warn("API_KEY environment variable not set. Using mock data.");
       return {

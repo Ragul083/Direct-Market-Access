@@ -12,7 +12,8 @@ export interface User {
   password?: string;
   role: UserRole;
   location: string;
-  verified?: boolean; // For farmers
+  verified?: boolean; // For Farmers and Buyers
+  aadharNumber?: string; // New field for authentication
 }
 
 export interface Crop {

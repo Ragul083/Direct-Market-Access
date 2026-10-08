@@ -37,7 +37,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
 
     const totalFarmers = users.filter(u => u.role === UserRole.FARMER).length;
     const totalBuyers = users.filter(u => u.role === UserRole.BUYER).length;
-    const pendingVerifications = users.filter(u => u.role === UserRole.FARMER && !u.verified).length;
+    // Count pending users (both farmers and buyers)
+    const pendingVerifications = users.filter(u => (u.role === UserRole.FARMER || u.role === UserRole.BUYER) && !u.verified).length;
 
     return (
         <div className="space-y-6">
@@ -59,6 +60,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                                 <th scope="col" className="px-6 py-3">{t('admin.table.name')}</th>
                                 <th scope="col" className="px-6 py-3">{t('admin.table.email')}</th>
                                 <th scope="col" className="px-6 py-3">{t('admin.table.role')}</th>
+                                <th scope="col" className="px-6 py-3">{t('admin.table.aadhar')}</th>
                                 <th scope="col" className="px-6 py-3">{t('admin.table.status')}</th>
                                 <th scope="col" className="px-6 py-3 text-center">{t('admin.table.actions')}</th>
                             </tr>
@@ -68,18 +70,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                                 <tr key={u.id} className="bg-white border-b hover:bg-gray-50">
                                     <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{u.name}</td>
                                     <td className="px-6 py-4">{u.email}</td>
-                                    <td className="px-6 py-4">{u.role}</td>
                                     <td className="px-6 py-4">
-                                        {u.role === UserRole.FARMER ? (
+                                        <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === UserRole.ADMIN ? 'bg-gray-200' : u.role === UserRole.FARMER ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}`}>
+                                            {u.role}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 font-mono">{u.aadharNumber || 'N/A'}</td>
+                                    <td className="px-6 py-4">
+                                        {u.role !== UserRole.ADMIN ? (
                                             u.verified ? 
                                             <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">Verified</span> : 
                                             <span className="px-2 py-1 text-xs font-medium text-orange-800 bg-orange-100 rounded-full">Pending</span>
                                         ) : (
-                                            <span className="px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">N/A</span>
+                                            <span className="px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Active</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-center space-x-2">
-                                        {u.role === UserRole.FARMER && !u.verified && (
+                                        {u.role !== UserRole.ADMIN && !u.verified && (
                                             <button onClick={() => handleToggleVerification(u.id)} className="font-medium text-green-600 hover:underline">{t('admin.approve')}</button>
                                         )}
                                         {u.id !== user.id && <button onClick={() => handleRemoveUser(u.id)} className="font-medium text-red-600 hover:underline">{t('admin.remove')}</button>}

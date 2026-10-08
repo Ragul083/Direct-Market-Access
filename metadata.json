@@ -1,7 +1,10 @@
 {
-  "name": "AgriLink DMA Platform",
+  "name": "Farmlink DMA Platform",
   "description": "A comprehensive Direct Market Access (DMA) platform connecting farmers directly with buyers. Features AI-powered price predictions, market trend analysis, and role-based dashboards for farmers, buyers, and administrators to streamline the agricultural supply chain.",
   "requestFramePermissions": [
     "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]
 }
