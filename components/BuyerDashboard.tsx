@@ -21,7 +21,7 @@ interface CropCardProps {
 }
 
 const CropCard: React.FC<CropCardProps> = ({ crop, onContact, onAnalyze, contactText, analyzeText, isVerified }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 border border-gray-100">
+    <div className="buyer-crop-card bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 border border-gray-100">
         <div className="p-6">
             <div className="flex justify-between items-start mb-2">
                 <div>

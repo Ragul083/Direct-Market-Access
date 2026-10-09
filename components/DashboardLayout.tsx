@@ -34,8 +34,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, onLogout, child
 
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
-      <aside className="w-64 bg-white shadow-md flex flex-col">
+    <div className="dashboard-shell flex h-screen bg-gray-100 font-sans">
+      <aside className="dashboard-sidebar hidden w-64 bg-white shadow-md md:flex md:flex-col">
         <div className="p-6 text-center border-b">
           <i className="fas fa-leaf text-4xl text-orange-500"></i>
           <h2 className="mt-2 text-2xl font-bold text-gray-800">{t('app.name')}</h2>
@@ -73,37 +73,62 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, onLogout, child
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between p-4 bg-white border-b">
-          <h1 className="text-xl font-semibold text-gray-700">{t('dashboard.welcome')}, {user.name}</h1>
-          <div className="flex items-center space-x-6">
+      <main className="dashboard-main flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="dashboard-header flex items-center justify-between gap-3 border-b bg-white p-4">
+          <div className="dashboard-greeting min-w-0">
+            <span className="dashboard-brand block text-sm font-bold text-orange-600 md:hidden">{t('app.name')}</span>
+            <h1 className="truncate text-xl font-semibold text-gray-700">{t('dashboard.welcome')}, {user.name}</h1>
+          </div>
+          <div className="dashboard-actions flex shrink-0 items-center gap-3 md:gap-6">
             <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as any)}
-                className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2"
+                aria-label="Language"
+                className="dashboard-language block rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-700 focus:border-green-500 focus:ring-green-500"
             >
                 <option value="en">English</option>
                 <option value="ta">தமிழ்</option>
             </select>
-             <div className="relative">
+             <div className="dashboard-search relative">
                 <input type="text" placeholder="Search..." className="pl-10 pr-4 py-2 w-64 border rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500" />
                 <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
              </div>
-             <button onClick={() => setActiveView('notifications')} className="relative text-gray-500 hover:text-orange-600 focus:outline-none">
+             <button aria-label={t('dashboard.menu.notifications')} onClick={() => setActiveView('notifications')} className="relative text-gray-500 hover:text-orange-600 focus:outline-none">
                 <i className="fas fa-bell text-2xl"></i>
                  {unreadNotificationsCount > 0 && (
                     <span className="absolute -top-1 -right-1 block h-4 w-4 text-xs flex items-center justify-center rounded-full bg-red-500 text-white">{unreadNotificationsCount}</span>
                 )}
              </button>
-             <button onClick={() => setIsChatOpen(!isChatOpen)} className="relative text-gray-500 hover:text-green-600 focus:outline-none">
+             <button aria-label="Open chat" onClick={() => setIsChatOpen(!isChatOpen)} className="relative text-gray-500 hover:text-green-600 focus:outline-none">
                 <i className="fas fa-comments text-2xl"></i>
+             </button>
+             <button onClick={onLogout} className="dashboard-mobile-logout rounded-lg p-2 text-gray-500 hover:bg-red-50 hover:text-red-600 md:hidden" aria-label={t('dashboard.logout')} title={t('dashboard.logout')}>
+                <i className="fas fa-sign-out-alt"></i>
              </button>
           </div>
         </header>
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="dashboard-content min-h-0 flex-1 overflow-y-auto p-6">
           {children}
         </div>
       </main>
+
+      <nav className="dashboard-mobile-nav md:hidden" aria-label="Main navigation">
+        <button aria-current={activeView === 'dashboard' ? 'page' : undefined} onClick={() => setActiveView('dashboard')} className={activeView === 'dashboard' ? 'active' : ''}>
+          <i className="fas fa-tachometer-alt" aria-hidden="true"></i>
+          <span>{t('dashboard.menu.dashboard')}</span>
+        </button>
+        <button aria-current={activeView === 'profile' ? 'page' : undefined} onClick={() => setActiveView('profile')} className={activeView === 'profile' ? 'active' : ''}>
+          <i className="fas fa-user-circle" aria-hidden="true"></i>
+          <span>{t('dashboard.menu.profile')}</span>
+        </button>
+        <button aria-current={activeView === 'notifications' ? 'page' : undefined} onClick={() => setActiveView('notifications')} className={activeView === 'notifications' ? 'active' : ''}>
+          <span className="dashboard-mobile-bell">
+            <i className="fas fa-bell" aria-hidden="true"></i>
+            {unreadNotificationsCount > 0 && <span className="dashboard-mobile-badge">{unreadNotificationsCount}</span>}
+          </span>
+          <span>{t('dashboard.menu.notifications')}</span>
+        </button>
+      </nav>
       
       <ChatWidget
         isOpen={isChatOpen}

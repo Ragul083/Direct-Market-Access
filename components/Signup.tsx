@@ -56,7 +56,7 @@ const Signup: React.FC<SignupProps> = ({ showLogin }) => {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 relative">
+    <div className="auth-screen flex items-center justify-center min-h-screen bg-gray-50 relative">
        <div className="absolute top-4 right-4">
         <select
           value={language}
@@ -67,7 +67,7 @@ const Signup: React.FC<SignupProps> = ({ showLogin }) => {
           <option value="ta">தமிழ் (Tamil)</option>
         </select>
       </div>
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+      <div className="auth-card w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
         <div className="text-center">
             <i className="fas fa-leaf text-5xl text-green-600"></i>
             <h1 className="mt-4 text-3xl font-bold text-gray-900">{t('signup.title')}</h1>

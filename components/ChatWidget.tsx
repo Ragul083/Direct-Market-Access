@@ -135,13 +135,13 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, currentUser, i
     if (!isOpen) return null;
 
     return (
-        <div className="fixed bottom-4 right-4 w-[600px] h-[500px] bg-white rounded-lg shadow-2xl flex flex-col z-50 animate-fade-in-up">
+        <div className="chat-panel fixed bottom-4 right-4 flex h-[500px] w-[600px] flex-col rounded-lg bg-white shadow-2xl z-50 animate-fade-in-up">
             <header className="flex items-center justify-between p-3 border-b bg-orange-600 text-white rounded-t-lg">
                 <h3 className="font-bold text-lg">{selectedConversation ? `Chat with ${getOtherParticipant(selectedConversation).name}` : 'Conversations'}</h3>
                 <button onClick={onClose} className="text-white hover:text-gray-200 text-xl">&times;</button>
             </header>
             <div className="flex flex-1 overflow-hidden">
-                <aside className="w-1/3 border-r overflow-y-auto">
+                <aside className="chat-conversations w-1/3 border-r overflow-y-auto">
                     {conversations.map(conv => (
                         <div key={conv.id} onClick={() => handleSelectConversation(conv)} className={`p-3 cursor-pointer hover:bg-gray-100 ${selectedConversation?.id === conv.id ? 'bg-orange-100' : ''}`}>
                             <p className="font-semibold text-gray-800">{getOtherParticipant(conv).name}</p>

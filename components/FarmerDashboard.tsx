@@ -21,7 +21,7 @@ const INDIAN_STATES = [
 ];
 
 const StatCard: React.FC<{ icon: string; title: string; value: string; color: string }> = ({ icon, title, value, color }) => (
-    <div className="bg-white p-6 rounded-lg shadow-md flex items-center">
+    <div className="dashboard-stat-card bg-white p-6 rounded-lg shadow-md flex items-center">
         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color}`}>
             <i className={`fas ${icon} text-white text-xl`}></i>
         </div>

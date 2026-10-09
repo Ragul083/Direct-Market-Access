@@ -9,7 +9,7 @@ interface AdminDashboardProps {
 }
 
 const StatCard: React.FC<{ icon: string; title: string; value: number; color: string }> = ({ icon, title, value, color }) => (
-    <div className="bg-white p-6 rounded-lg shadow-md flex items-center">
+    <div className="dashboard-stat-card bg-white p-6 rounded-lg shadow-md flex items-center">
         <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color}`}>
             <i className={`fas ${icon} text-white text-xl`}></i>
         </div>
@@ -54,7 +54,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                     <h3 className="text-lg font-semibold text-gray-800">{t('admin.user_management')}</h3>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-gray-500">
+                    <table className="admin-user-table w-full text-sm text-left text-gray-500">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                             <tr>
                                 <th scope="col" className="px-6 py-3">{t('admin.table.name')}</th>
@@ -67,16 +67,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                         </thead>
                         <tbody>
                             {users.map(u => (
-                                <tr key={u.id} className="bg-white border-b hover:bg-gray-50">
-                                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{u.name}</td>
-                                    <td className="px-6 py-4">{u.email}</td>
-                                    <td className="px-6 py-4">
+                                <tr key={u.id} className="admin-user-row bg-white border-b hover:bg-gray-50">
+                                    <td data-label={t('admin.table.name')} className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{u.name}</td>
+                                    <td data-label={t('admin.table.email')} className="px-6 py-4">{u.email}</td>
+                                    <td data-label={t('admin.table.role')} className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded text-xs font-bold ${u.role === UserRole.ADMIN ? 'bg-gray-200' : u.role === UserRole.FARMER ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}`}>
                                             {u.role}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 font-mono">{u.aadharNumber || 'N/A'}</td>
-                                    <td className="px-6 py-4">
+                                    <td data-label={t('admin.table.aadhar')} className="px-6 py-4 font-mono">{u.aadharNumber || 'N/A'}</td>
+                                    <td data-label={t('admin.table.status')} className="px-6 py-4">
                                         {u.role !== UserRole.ADMIN ? (
                                             u.verified ? 
                                             <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">Verified</span> : 
@@ -85,7 +85,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
                                             <span className="px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full">Active</span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-center space-x-2">
+                                    <td data-label={t('admin.table.actions')} className="admin-user-actions px-6 py-4 text-center space-x-2">
                                         {u.role !== UserRole.ADMIN && !u.verified && (
                                             <button onClick={() => handleToggleVerification(u.id)} className="font-medium text-green-600 hover:underline">{t('admin.approve')}</button>
                                         )}
